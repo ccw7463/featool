@@ -33,9 +33,9 @@ for step = 1:1:100
 
     % set saved name
     save_name_temp = strcat(int2str(step),"_ux_"); % 0_ux_
-    save_name_temp = strcat(save_name_temp,Ux_Velocity_str); % 0_ux_값
-    save_name_temp = strcat(save_name_temp,"_uy_"); % 0_ux_값_uy_
-    save_name = strcat(save_name_temp,Uy_Velocity_str); % 0_ux_값_uy_값
+    save_name_temp = strcat(save_name_temp,Ux_Velocity_str); % 0_ux_ux-value
+    save_name_temp = strcat(save_name_temp,"_uy_"); % 0_ux_ux-value_uy_
+    save_name = strcat(save_name_temp,Uy_Velocity_str); % 0_ux_ux-value_uy_uy-value
 
     % feature setting
     fea.sdim = { 'x', 'y' };
