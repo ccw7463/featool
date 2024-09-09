@@ -2,7 +2,7 @@
 % 1. Fixed speed value
 % 2. Generate 3 random positions of triangles 
 %    (1 equilateral triangle, 1 isosceles, 1 regular)
-% 3. Geometry : x-axis 0~2, y-axis 0~0.5
+% 3. Geometry : x-axis 0~3, y-axis 0~1.5
 % 4. save : ux, uy, pressure, subd, solve
 
 % argument setting
@@ -254,14 +254,18 @@ for step = 1:1:1
 end
 
 function offset = generate_random_offset(existing_offsets, min_distance, size_factor, x_lim, y_lim)
+    % Adjust the limits internally to ensure the triangles are at least 0.2 units away from the walls
+    x_internal_lim = [x_lim(1) + 0.2, x_lim(2) - 0.2];
+    y_internal_lim = [y_lim(1) + 0.2, y_lim(2) - 0.2];
+    
     is_valid = false;
     while ~is_valid
-        % x, y 좌표 랜덤 생성 (삼각형이 사각형 틀을 넘지 않도록 경계를 고려)
-        x_center = (x_lim(2) - x_lim(1) - 2*size_factor) * rand() + x_lim(1) + size_factor;
-        y_center = (y_lim(2) - y_lim(1) - 2*size_factor) * rand() + y_lim(1) + size_factor;
+        % Generate x,y positions within the adjusted limits
+        x_center = (x_internal_lim(2) - x_internal_lim(1) - 2*size_factor) * rand() + x_internal_lim(1) + size_factor;
+        y_center = (y_internal_lim(2) - y_internal_lim(1) - 2*size_factor) * rand() + y_internal_lim(1) + size_factor;
         offset = [x_center, y_center];
         
-        % 기존 삼각형들과 겹치는지 확인
+        % Check overlap
         is_valid = true;
         for i = 1:size(existing_offsets, 1)
             distance = norm(offset - existing_offsets(i, :));

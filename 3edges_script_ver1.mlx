@@ -260,14 +260,18 @@ for step = 1:1:200
 end
 
 function offset = generate_random_offset(existing_offsets, min_distance, size_factor, x_lim, y_lim)
+    % Adjust the limits internally to ensure the triangles are at least 0.2 units away from the walls
+    x_internal_lim = [x_lim(1) + 0.2, x_lim(2) - 0.2];
+    y_internal_lim = [y_lim(1) + 0.2, y_lim(2) - 0.2];
+    
     is_valid = false;
     while ~is_valid
-        % generate x,y positions
-        x_center = (x_lim(2) - x_lim(1) - 2*size_factor) * rand() + x_lim(1) + size_factor;
-        y_center = (y_lim(2) - y_lim(1) - 2*size_factor) * rand() + y_lim(1) + size_factor;
+        % Generate x,y positions within the adjusted limits
+        x_center = (x_internal_lim(2) - x_internal_lim(1) - 2*size_factor) * rand() + x_internal_lim(1) + size_factor;
+        y_center = (y_internal_lim(2) - y_internal_lim(1) - 2*size_factor) * rand() + y_internal_lim(1) + size_factor;
         offset = [x_center, y_center];
         
-        % check overlab
+        % Check overlap
         is_valid = true;
         for i = 1:size(existing_offsets, 1)
             distance = norm(offset - existing_offsets(i, :));
