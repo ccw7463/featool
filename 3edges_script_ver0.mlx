@@ -7,8 +7,8 @@
 
 % argument setting
 cOptDef = {   ...
-    'width',     2; % length of x-axis
-    'height',    0.5; % length of y-axis
+    'width',     3; % length of x-axis
+    'height',    1.5; % length of y-axis
     'Ux_path',  'Dataset/Ux/';
     'Uy_path',   'Dataset/Uy/';
     'P_path',    'Dataset/Pressure/';
@@ -19,8 +19,7 @@ cOptDef = {   ...
 % opt has value of argument setting
 [got,opt] = parseopt(cOptDef);
 
-% simulation for 100 times
-for step = 1:1:100
+for step = 1:1:1
 
     clf('reset')
     clearvars -except step opt
@@ -33,9 +32,9 @@ for step = 1:1:100
 
     % set saved name
     save_name_temp = strcat(int2str(step),"_ux_"); % 0_ux_
-    save_name_temp = strcat(save_name_temp,Ux_Velocity_str); % 0_ux_ux-value
-    save_name_temp = strcat(save_name_temp,"_uy_"); % 0_ux_ux-value_uy_
-    save_name = strcat(save_name_temp,Uy_Velocity_str); % 0_ux_ux-value_uy_uy-value
+    save_name_temp = strcat(save_name_temp,Ux_Velocity_str); % 0_ux_값
+    save_name_temp = strcat(save_name_temp,"_uy_"); % 0_ux_값_uy_
+    save_name = strcat(save_name_temp,Uy_Velocity_str); % 0_ux_값_uy_값
 
     % feature setting
     fea.sdim = { 'x', 'y' };
@@ -48,7 +47,7 @@ for step = 1:1:100
     
     % setting of obstacle
     min_distance = 0.25; % minimum distance among triangle
-    size_factor = 0.13;  % size factor to obstacle
+    size_factor = 0.2;  % size factor to obstacle
     existing_offsets = []; % array of existing obstacle
     
     % generate obstcle 1: equilateral
@@ -88,7 +87,7 @@ for step = 1:1:100
                              'miu_ns', 'mu', 'Viscosity', { '1' };
                              'Fx_ns', 'F_x', 'Volume force in x-direction', { '0' };
                              'Fy_ns', 'F_y', 'Volume force in y-direction', { '0' };
-                             'u0_ns', 'u_0', 'Initial condition for u', { '5' };
+                             'u0_ns', 'u_0', 'Initial condition for u', { '0' };
                              'v0_ns', 'v_0', 'Initial condition for v', { '0' };
                              'p0_ns', 'p_0', 'Initial condition for p', { '0' };
                              'miuT_ns', [], 'Turbulent viscosity', { 0 } };
@@ -118,58 +117,58 @@ for step = 1:1:100
     fea.phys.ns.prop.intb = 0;
     
     %% Boundary settings
-    fea.phys.ns.bdr.sel = [ 1, 4, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ];
-    fea.phys.ns.bdr.coef = { 'bw_ns', 'u = 0', 'Wall/no-slip', [], { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1;
-                             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1;
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, [], { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    fea.phys.ns.bdr.sel = [ 1, 4, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1 ];
+    fea.phys.ns.bdr.coef = { 'bw_ns', 'u = 0', 'Wall/no-slip', [], { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1;
+                             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1;
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, [], { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
                              'bv_ns', 'u = u_0', 'Inlet/velocity', { 'u_0';
                              'v_0';
-                             [] }, { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1;
-                             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1;
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, [], { 0, 0, 0, Ux_Velocity, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                             0, 0, 0, '0', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-                             'bn_ns', '-n.(-pI + mu(grad u+grad uT)) = 0', 'Neutral outflow/stress boundary', [], { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, [], { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                             [] }, { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1;
+                             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1;
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, [], { 0, 0, 0, Ux_Velocity, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                             0, 0, 0, Uy_Velocity, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                             'bn_ns', '-n.(-pI + mu(grad u+grad uT)) = 0', 'Neutral outflow/stress boundary', [], { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, [], { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
                              'bp_ns', 'p = p_0', 'Outflow/pressure', { [];
                              [];
-                             'p_0' }, { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, { { '-p*nx';
+                             'p_0' }, { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, { { '-p*nx';
                              '-p*ny';
                              '0' };
-                             [] }, { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                             0, '0', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-                             'bs_ns', 'n&.u = 0, -n.(-pI + mu(grad u+grad uT)).t = 0', 'Symmetry/slip', [], { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, [], { 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip';
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } };
-    fea.phys.ns.bdr.coefi = { 'bcic_ns', 'n.(F_1-F_2) = 0, F_i=-p_iI + mu_i(grad u_i+grad u_iT)', 'Continuity', [], { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, [], { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                             [] }, { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                             0, '0', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                             'bs_ns', 'n&.u = 0, -n.(-pI + mu(grad u+grad uT)).t = 0', 'Symmetry/slip', [], { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, [], { 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip', 'solve_hook_bdrslip';
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } };
+    fea.phys.ns.bdr.coefi = { 'bcic_ns', 'n.(F_1-F_2) = 0, F_i=-p_iI + mu_i(grad u_i+grad u_iT)', 'Continuity', [], { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, [], { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
                               'bcij_ns', 'u = u_0', 'Prescribed velocity', { 'u_0';
                               'v_0';
-                              [] }, { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1;
-                              1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1;
-                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, [], { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                              [] }, { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1;
+                              1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1;
+                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, [], { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
                               'bcir_ns', 'p = p_0', 'Prescribed pressure', { [];
                               [];
-                              'p_0' }, { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                              1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, [], { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } };
+                              'p_0' }, { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                              1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, [], { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } };
     fea.phys.ns.bdr.vars = { 'Viscous force, x-component', '(miu_ns+miuT_ns)*(2*nx*ux+ny*(uy+vx))';
                              'Viscous force, y-component', '(miu_ns+miuT_ns)*(nx*(vx+uy)+2*ny*vy)';
                              'Total force, x-component', '-nx*p+(miu_ns+miuT_ns)*(2*nx*ux+ny*(uy+vx))';
@@ -201,8 +200,8 @@ for step = 1:1:100
               'surfexpr', 'u', ...
               'axis','off',...
               'colorbar','off',...
-              'caxis',[0 30],...
               'solnum', 1 );
+    %               'caxis',[0 6],...
     image = gca;
     ux_save_path = strcat(opt.Ux_path,save_name);
     ux_save_path = strcat(ux_save_path,'.jpg');
@@ -214,8 +213,8 @@ for step = 1:1:100
               'surfexpr', 'v', ...
               'axis','off',...
               'colorbar','off',... 
-              'caxis',[-15 10],...
               'solnum', 1 );
+              %               'caxis',[-10 10],...
     image = gca;
     uy_save_path = strcat(opt.Uy_path,save_name);
     uy_save_path = strcat(uy_save_path,'.jpg');
@@ -227,8 +226,8 @@ for step = 1:1:100
               'surfexpr', 'p', ...
               'axis','off',...
               'colorbar','off',...
-              'caxis',[-500 5000],...
               'solnum', 1 );
+    %               'caxis',[-500 5000],...
     image = gca;
     pressure_save_path = strcat(opt.P_path,save_name);
     pressure_save_path = strcat(pressure_save_path,'.jpg');
@@ -257,12 +256,12 @@ end
 function offset = generate_random_offset(existing_offsets, min_distance, size_factor, x_lim, y_lim)
     is_valid = false;
     while ~is_valid
-        % generate x,y positions
+        % x, y 좌표 랜덤 생성 (삼각형이 사각형 틀을 넘지 않도록 경계를 고려)
         x_center = (x_lim(2) - x_lim(1) - 2*size_factor) * rand() + x_lim(1) + size_factor;
         y_center = (y_lim(2) - y_lim(1) - 2*size_factor) * rand() + y_lim(1) + size_factor;
         offset = [x_center, y_center];
         
-        % check overlab
+        % 기존 삼각형들과 겹치는지 확인
         is_valid = true;
         for i = 1:size(existing_offsets, 1)
             distance = norm(offset - existing_offsets(i, :));
@@ -276,21 +275,24 @@ end
 
 
 function triangle = generate_triangle(type, x_lim, y_lim, offset, size_factor)
-    % Receives basic offset to prevent each triangle from overlapping
-    x_center = offset(1);  % Use the given offset(1) as the center of x
-    y_center = offset(2);  % Use the given offset(2) as the center of y
+    % 기본 offset을 받아서 각 삼각형이 겹치지 않도록 함.
+    x_center = offset(1);  % 주어진 offset을 x 중심으로 사용
+    y_center = offset(2);  % 주어진 offset을 y 중심으로 사용
+    
     switch type
-        case 'equilateral'  % equilateral triangle
-            theta = (0:2) * (2*pi/3);  % angle
+        case 'equilateral'  % 정삼각형
+            theta = (0:2) * (2*pi/3);  % 각도
             x = x_center + size_factor * cos(theta);
             y = y_center + size_factor * sin(theta);
-        case 'isosceles'  % isosceles triangle
+        case 'isosceles'  % 이등변삼각형
             x = [x_center - size_factor, x_center + size_factor, x_center];
             y = [y_center - size_factor/2, y_center - size_factor/2, y_center + size_factor];
-        case 'scalene'  % regular triangle
+        case 'scalene'  % 일반 삼각형
             x = x_center + size_factor * [0, 0.8, 0.5];
             y = y_center + size_factor * [0, 0.2, 1.2];
     end
+    
+    % 삼각형 닫기 (첫 번째 점을 마지막에 추가)
     triangle = [x; y];
     triangle = [triangle, triangle(:,1)];
 end
