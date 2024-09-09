@@ -7,7 +7,7 @@
 
 % argument setting
 cOptDef = {   ...
-    'width',     1.5; % length of x-axis
+    'width',     3; % length of x-axis
     'height',    1.5; % length of y-axis
     'Ux_from',    1; % length of y-axis
     'Ux_to',    3; % length of y-axis
@@ -41,26 +41,26 @@ for step = 1:1:100
     save_name_temp = strcat(save_name_temp,Uy_Velocity_str); % 0_ux_ux-value_uy_uy-value
     save_name = strcat('3edges_',save_name_temp) % 3edges_0_ux_ux-value_uy_uy-value
 
-    % feature setting
-    fea.sdim = { 'x', 'y' };
-    fea = addphys( fea, @navierstokes, { 'u', 'v', 'p' } );
-    gobj = gobj_rectangle( 0, opt.width, 0, opt.height, 'R1');
-
     % geometry
     x_lim = [0, opt.width];
     y_lim = [0, opt.height];
     
     % setting of obstacle
-    size_factor = 0.25;
+    size_factor = 0.3;
 
-    % generate regular pentagon (obstacle 1)
-    offset = generate_random_offset(0.4, 1.1, 0.4, 1.1, size_factor);
+    % generate a single triangle
+    offset = generate_random_offset([opt.width*0.25, opt.width*0.75], [opt.height*0.25, opt.height*0.75], size_factor, opt);
     shape = select_triangle_shape();
-    triangle = generate_triangle(shape, offset, size_factor)';
-    
-    % final geometry
+    triangle = generate_triangle(shape, offset, size_factor, opt);
+    rotated_triangle = apply_random_rotation(triangle, offset)'; % Apply random rotation
+
+
+    % feature setting
+    fea.sdim = { 'x', 'y' };
+    fea = addphys( fea, @navierstokes, { 'u', 'v', 'p' } );
+    gobj = gobj_rectangle( 0, opt.width, 0, opt.height, 'R1');
     fea = geom_add_gobj( fea, gobj );
-    gobj = gobj_polygon( triangle, 'P1');
+    gobj = gobj_polygon( rotated_triangle, 'P1');
     fea = geom_add_gobj( fea, gobj );
     fea.geom = geom_apply_formula( fea.geom, 'R1-P1' );
 
@@ -241,53 +241,60 @@ for step = 1:1:100
     writetable(output,solve_path,'Delimiter', ',','QuoteStrings',true);
 end
 
-% generate random offset function (no overlap check)
+% generate random offset function within specified range
 
-function offset = generate_random_offset(x_min, x_max, y_min, y_max, size_factor)
-    % Adjust the limits internally to ensure the triangle is within bounds
-    x_internal_lim = [x_min + size_factor, x_max - size_factor];
-    y_internal_lim = [y_min + size_factor, y_max - size_factor];
-
-    % Generate x,y positions within the adjusted limits
-    x_center = (x_internal_lim(2) - x_internal_lim(1)) * rand() + x_internal_lim(1);
-    y_center = (y_internal_lim(2) - y_internal_lim(1)) * rand() + y_internal_lim(1);
+function offset = generate_random_offset(x_lim, y_lim, size_factor, opt)
+    % Generate x, y positions within the specified range
+    x_center = (x_lim(2) - x_lim(1)) * rand() + x_lim(1);
+    y_center = (y_lim(2) - y_lim(1)) * rand() + y_lim(1);
     offset = [x_center, y_center];
 end
 
-% select triangle shape type function
+% select triangle shape type function (equilateral or random)
 function shape = select_triangle_shape()
-    shapes = {'equilateral', 'isosceles', 'right-angled', 'scalene'};
+    shapes = {'equilateral', 'random'};
     shape = shapes{randi(length(shapes))};
 end
 
-% generate triangle function
-function triangle = generate_triangle(type, offset, size_factor)
+% generate triangle function using opt.width and opt.height
+function triangle = generate_triangle(type, offset, size_factor, opt)
     x_center = offset(1);
     y_center = offset(2);
+    
+    % Ensure base is at least opt.width*0.2
+    base_length = max(opt.width*0.2, opt.width*0.2 + (size_factor - 0.3) * rand());  
+
+    % Minimum and maximum height based on opt.height
+    min_height = opt.height * 0.35;  
+    max_height = opt.height * 0.65;  
 
     switch type
         case 'equilateral'
-            % Equilateral triangle: all sides are equal
-            height = sqrt(3) / 2 * 2 * size_factor;
-            x = [x_center - size_factor, x_center + size_factor, x_center];
+            % Equilateral triangle: adjust for the required base and height
+            height = max(min(sqrt(3) / 2 * base_length, max_height), min_height);  
+            x = [x_center - base_length/2, x_center + base_length/2, x_center];
             y = [y_center - height / 3, y_center - height / 3, y_center + 2*height / 3];
 
-        case 'isosceles'
-            % Isosceles triangle: two sides are equal
-            height = 2 * size_factor;
-            x = [x_center - size_factor, x_center + size_factor, x_center];
-            y = [y_center - size_factor, y_center - size_factor, y_center + height];
-
-        case 'right-angled'
-            % Right-angled triangle: one angle is 90 degrees
-            x = [x_center, x_center + size_factor, x_center];
-            y = [y_center, y_center, y_center + size_factor];
-
-        case 'scalene'
-            % Scalene triangle: all sides are different
-            x = [x_center - size_factor, x_center + 1.2*size_factor, x_center + 0.7*size_factor];
-            y = [y_center - size_factor, y_center - 0.8*size_factor, y_center + size_factor];
+        case 'random'
+            % Random triangle: ensure base and height constraints
+            height = max(min(0.5 + size_factor * rand(), max_height), min_height);  
+            x = [x_center - base_length/2, x_center + base_length/2, x_center + base_length*(rand() - 0.5)];
+            y = [y_center - height/2, y_center - height/2, y_center + height];
     end
     triangle = [x; y];
     triangle = [triangle, triangle(:,1)]; % close the triangle
+end
+
+% apply random rotation to the triangle
+function rotated_triangle = apply_random_rotation(triangle, offset)
+    % Generate a random angle in radians
+    angle = 2 * pi * rand();
+    
+    % Create a rotation matrix
+    R = [cos(angle), -sin(angle); sin(angle), cos(angle)];
+    
+    % Subtract the center offset, rotate, then re-add the offset
+    triangle_shifted = triangle - offset'; % Shift triangle to origin
+    rotated_triangle = R * triangle_shifted; % Rotate the triangle
+    rotated_triangle = rotated_triangle + offset'; % Shift back to original position
 end
