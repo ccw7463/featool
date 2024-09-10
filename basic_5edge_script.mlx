@@ -2,12 +2,17 @@
 % 1. change speed value per samples
 %    (ux : 1~3, uy : -0.5~0.5)
 % 2. Generate 1 obstacle of 5 edge
-% 3. Geometry : x-axis 0~1.5, y-axis 0~1.5
-% 4. save : ux, uy, pressure, subd, solve
+%   - select one among types 2 (regular, random)
+%   - x-axis 0~3, y-axis 0~1.5
+%   - minimum position of x : width*0.20
+%   - maximum position of x : width*0.80
+%   - minimum position of y : width*0.20
+%   - maximum position of y : width*0.80
+% 3. save : ux, uy, pressure, subd, solve
 
 % argument setting
 cOptDef = {   ...
-    'width',     1.5; % length of x-axis
+    'width',     3; % length of x-axis
     'height',    1.5; % length of y-axis
     'Ux_from',    1; % length of y-axis
     'Ux_to',    3; % length of y-axis
@@ -51,10 +56,10 @@ for step = 1:1:100
     y_lim = [0, opt.height];
     
     % setting of obstacle
-    size_factor = 0.25;
+    size_factor = 0.4;
 
     % generate a single pentagon
-    offset = generate_random_offset(0.4, 1.1, 0.4, 1.1, size_factor);
+    offset = generate_random_offset(opt.width*0.2, opt.width*0.8, opt.height*0.2, opt.height*0.8, size_factor);
     shape = select_pentagon_shape();
     pentagon = generate_pentagon(shape, offset, size_factor)';
     
